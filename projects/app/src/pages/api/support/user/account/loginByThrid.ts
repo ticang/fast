@@ -18,7 +18,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     await Promise.all([withNextCors(req, res), connectToDatabase()]);
     const { username } = req.query as { username: string };
-
+    let { app } = req.query as { app: string };
+    if (app === null || app === undefined) {
+      app = 'polaris';
+    }
     if (!username) {
       throw new Error('缺少参数');
     }
@@ -85,7 +88,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     //create dataset
     const datasetId = await findDatasetOrCreate({
       avatar: '/icon/logo.svg',
-      name: 'polaris',
+      name: app,
       intro: '',
       type: 'dataset',
       teamId: teamId,
@@ -99,7 +102,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     //create app
     const appId = await findAppOrCreate({
       avatar: defaultTemplates[0].avatar,
-      name: defaultTemplates[0].name,
+      name: app,
       teamId: teamId,
       tmbId: tmbId,
       datasetId: datasetId.toString(),
@@ -111,7 +114,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       throw new Error('应用创建失败');
     }
     const apiKey = await findOpenApiOrCreate({
-      name: 'polaris',
+      name: app,
       teamId: teamId,
       tmbId: tmbId,
       appId: appId.toString(),
