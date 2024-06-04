@@ -93,8 +93,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       type: 'dataset',
       teamId: teamId,
       tmbId: tmbId,
-      vectorModel: 'chatglm3-6b',
-      agentModel: 'bge-large-zh-v1.5-local'
+      vectorModel: 'bge-large-zh-v1.5-local',
+      agentModel: 'chatglm3-6b'
     });
     if (datasetId === null || datasetId === undefined) {
       throw new Error('知识库创建失败');
