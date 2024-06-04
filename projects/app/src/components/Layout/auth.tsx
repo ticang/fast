@@ -9,6 +9,7 @@ const unAuthPage: { [key: string]: boolean } = {
   '/login': true,
   '/login/provider': true,
   '/login/fastlogin': true,
+  '/login/loginByThrid': true,
   '/appStore': true,
   '/chat/share': true,
   '/chat/team': true,

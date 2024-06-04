@@ -1,11 +1,14 @@
 import { CollectionWithDatasetType, DatasetSchemaType } from '@fastgpt/global/core/dataset/type';
 import { MongoDatasetCollection } from './collection/schema';
 import { MongoDataset } from './schema';
-import { delCollectionRelatedSource } from './collection/controller';
+import { createDefaultCollection, delCollectionRelatedSource } from './collection/controller';
 import { ClientSession } from '../../common/mongo';
 import { MongoDatasetTraining } from './training/schema';
 import { MongoDatasetData } from './data/schema';
 import { deleteDatasetDataVector } from '../../common/vectorStore/controller';
+import { DatasetTypeEnum } from '@fastgpt/global/core/dataset/constants';
+import { getDatasetModel, getLLMModel, getVectorModel } from '../ai/model';
+import console from 'console';
 
 /* ============= dataset ========== */
 /* find all datasetId by top datasetId */
@@ -107,4 +110,56 @@ export async function delDatasetRelevantData({
 
   // no session delete: delete files, vector data
   await deleteDatasetDataVector({ teamId, datasetIds });
+}
+
+export async function findDatasetOrCreate({
+  parentId,
+  name,
+  type = DatasetTypeEnum.dataset,
+  avatar,
+  vectorModel = global.vectorModels[0].model,
+  agentModel = getDatasetModel().model,
+  teamId,
+  tmbId
+}: {
+  parentId?: string;
+  type: `${DatasetTypeEnum}`;
+  name: string;
+  intro: string;
+  avatar: string;
+  vectorModel?: string;
+  agentModel?: string;
+  teamId: string;
+  tmbId: string;
+}): Promise<String> {
+  const dataset = await MongoDataset.findOne({
+    teamId,
+    tmbId,
+    name,
+    type
+  });
+
+  if (dataset) {
+    return dataset._id;
+  }
+  const { _id } = await MongoDataset.create({
+    name,
+    teamId,
+    tmbId,
+    vectorModel,
+    agentModel,
+    avatar,
+    parentId: parentId || null,
+    type
+  });
+
+  if (type === DatasetTypeEnum.dataset) {
+    await createDefaultCollection({
+      datasetId: _id,
+      teamId,
+      tmbId
+    });
+  }
+
+  return _id;
 }

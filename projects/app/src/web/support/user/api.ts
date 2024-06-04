@@ -78,3 +78,6 @@ export const getWXLoginQR = () =>
 
 export const getWXLoginResult = (code: string) =>
   GET<ResLogin>(`/proApi/support/user/account/login/wx/getResult`, { code });
+
+export const loginByThrid = (username: string) =>
+  GET<ResLogin>(`/support/user/account/loginByThrid`, { username });

@@ -135,7 +135,7 @@ export const appTemplates: (AppItemType & {
             ],
             label: 'core.module.input.label.aiModel',
             valueType: WorkflowIOValueTypeEnum.string,
-            value: 'gpt-3.5-turbo'
+            value: 'chatglm3-6b'
           },
           {
             key: 'temperature',
@@ -612,7 +612,7 @@ export const appTemplates: (AppItemType & {
             ],
             label: 'core.module.input.label.aiModel',
             valueType: WorkflowIOValueTypeEnum.string,
-            value: 'gpt-3.5-turbo'
+            value: 'chatglm3-6b'
           },
           {
             key: 'temperature',
@@ -940,7 +940,7 @@ export const appTemplates: (AppItemType & {
             ],
             label: 'core.module.input.label.aiModel',
             valueType: WorkflowIOValueTypeEnum.string,
-            value: 'gpt-3.5-turbo'
+            value: 'chatglm3-6b'
           },
           {
             key: 'temperature',
@@ -1060,7 +1060,7 @@ export const appTemplates: (AppItemType & {
             required: true,
             valueType: WorkflowIOValueTypeEnum.string,
             llmModelType: 'classify',
-            value: 'gpt-3.5-turbo'
+            value: 'chatglm3-6b'
           },
           {
             key: 'systemPrompt',

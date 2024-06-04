@@ -23,6 +23,7 @@ const pcUnShowLayoutRoute: Record<string, boolean> = {
   '/login': true,
   '/login/provider': true,
   '/login/fastlogin': true,
+  '/login/loginByThrid': true,
   '/chat/share': true,
   '/chat/team': true,
   '/app/edit': true,

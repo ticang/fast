@@ -66,7 +66,12 @@ async function initRootUser(retry = 3): Promise<any> {
         rootId = _id;
       }
       // init root team
-      await createDefaultTeam({ userId: rootId, balance: 9999 * PRICE_SCALE, session });
+      await createDefaultTeam({
+        userId: rootId,
+        teamName: 'root',
+        balance: 9999 * PRICE_SCALE,
+        session
+      });
     });
 
     console.log(`root user init:`, {

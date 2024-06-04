@@ -170,7 +170,7 @@ export async function parseHeaderCert({
 
 /* set cookie */
 export const setCookie = (res: NextApiResponse, token: string) => {
-  res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; Max-Age=604800; Samesite=Strict;`);
+  res.setHeader('Set-Cookie', `token=${token}; Path=/; Max-Age=604800;`);
 };
 /* clear cookie */
 export const clearCookie = (res: NextApiResponse) => {
