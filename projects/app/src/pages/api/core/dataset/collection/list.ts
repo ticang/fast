@@ -50,7 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         : {}),
       ...(collectionId
         ? {
-            collectionId: new Types.ObjectId(collectionId)
+            _id: new Types.ObjectId(collectionId)
           }
         : {})
     };
