@@ -15,7 +15,7 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<InitChatResponse | void> {
-  let { appId, chatId, loadCustomFeedbacks } = req.query as InitChatProps;
+  let { appId, chatId, loadCustomFeedbacks, lessThanId } = req.query as InitChatProps;
 
   if (!appId) {
     return jsonRes(res, {
@@ -46,6 +46,7 @@ async function handler(
       appId,
       chatId,
       limit: 30,
+      lessThanId,
       field: `dataId obj value adminFeedback userBadFeedback userGoodFeedback ${
         DispatchNodeResponseKeyEnum.nodeResponse
       } ${loadCustomFeedbacks ? 'customFeedbacks' : ''}`
