@@ -46,6 +46,8 @@ export type CreateDatasetCollectionParams = DatasetCollectionChunkMetadataType &
 
 export type ApiCreateDatasetCollectionParams = DatasetCollectionChunkMetadataType & {
   datasetId: string;
+  realName?: string;
+  realFileId?: string;
   tags?: string[];
 };
 export type TextCreateDatasetCollectionParams = ApiCreateDatasetCollectionParams & {

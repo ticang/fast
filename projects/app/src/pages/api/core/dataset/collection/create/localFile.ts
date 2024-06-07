@@ -29,7 +29,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
    * Creates the multer uploader
    */
   const upload = getUploadModel({
-    maxSize: (global.feConfigs?.uploadFileMaxSize || 500) * 1024 * 1024
+    maxSize: (global.feConfigs?.uploadFileMaxSize || 1000) * 1024 * 1024
   });
   let filePaths: string[] = [];
 
@@ -52,7 +52,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       per: 'w',
       datasetId: data.datasetId
     });
-
+    const realName = data.realName;
+    const realFileId = data.realFileId;
     const {
       trainingType = TrainingModeEnum.chunk,
       chunkSize = 512,
@@ -111,6 +112,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
         tmbId,
         type: DatasetCollectionTypeEnum.file,
         fileId,
+        realName,
+        realFileId,
         rawTextLength: rawText.length,
         hashRawText: hashStr(rawText),
         metadata: {

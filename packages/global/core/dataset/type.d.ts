@@ -53,6 +53,8 @@ export type DatasetCollectionSchemaType = {
   tags?: string[];
 
   fileId?: string; // local file id
+  realName?: string; // local file id
+  realFileId?: string; // local file id
   rawLink?: string; // link url
   externalFileId?: string; //external file id
 
@@ -160,6 +162,8 @@ export type DatasetDataItemType = {
   collectionId: string;
   sourceName: string;
   sourceId?: string;
+  realSourceName?: string;
+  realSourceId?: string;
   q: string;
   a: string;
   chunkIndex: number;

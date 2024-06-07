@@ -40,6 +40,14 @@ const DatasetCollectionSchema = new Schema({
     type: String,
     required: true
   },
+  realName: {
+    type: String,
+    required: false
+  },
+  realFileId: {
+    type: String,
+    required: false
+  },
   createTime: {
     type: Date,
     default: () => new Date()

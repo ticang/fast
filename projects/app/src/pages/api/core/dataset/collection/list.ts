@@ -21,6 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       pageSize = 10,
       datasetId,
       parentId = null,
+      collectionId = null,
       searchText = '',
       selectFolder = false,
       simple = false
@@ -45,6 +46,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       ...(searchText
         ? {
             name: new RegExp(searchText, 'i')
+          }
+        : {}),
+      ...(collectionId
+        ? {
+            collectionId: new Types.ObjectId(collectionId)
           }
         : {})
     };

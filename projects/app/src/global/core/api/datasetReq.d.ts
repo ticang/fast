@@ -17,6 +17,7 @@ import type { LLMModelItemType } from '@fastgpt/global/core/ai/model.d';
 export type GetDatasetCollectionsProps = RequestPaging & {
   datasetId: string;
   parentId?: string;
+  collectionId?: string;
   searchText?: string;
   simple?: boolean;
   selectFolder?: boolean;

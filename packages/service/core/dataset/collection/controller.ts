@@ -30,6 +30,8 @@ export async function createOneCollection({
   qaPrompt,
 
   fileId,
+  realName,
+  realFileId,
   rawLink,
 
   externalFileId,
@@ -63,6 +65,8 @@ export async function createOneCollection({
         qaPrompt,
 
         fileId,
+        realName,
+        realFileId,
         rawLink,
         externalFileId,
         externalFileUrl,
