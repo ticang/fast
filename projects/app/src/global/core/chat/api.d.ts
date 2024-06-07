@@ -13,6 +13,7 @@ export type GetChatSpeechProps = {
 export type InitChatProps = {
   appId?: string;
   chatId?: string;
+  lessThanId?: string;
   loadCustomFeedbacks?: boolean;
 };
 export type InitOutLinkChatProps = {
