@@ -65,6 +65,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
     if (realName) {
       collectionName = realName;
     }
+    console.log('realName---' + realName + '---' + collectionName);
     const relatedImgId = getNanoid();
 
     // 1. read file
