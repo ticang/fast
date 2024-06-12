@@ -1,4 +1,4 @@
-import { AppTypeMap } from '@fastgpt/global/core/app/constants';
+import { AppTypeEnum, AppTypeMap } from '@fastgpt/global/core/app/constants';
 import { connectionMongo, type Model } from '../../common/mongo';
 const { Schema, model, models } = connectionMongo;
 import type { AppSchema as AppType } from '@fastgpt/global/core/app/type.d';
@@ -7,6 +7,7 @@ import {
   TeamCollectionName,
   TeamMemberCollectionName
 } from '@fastgpt/global/support/user/team/constant';
+import { AppDefaultPermissionVal } from '@fastgpt/global/support/permission/app/constant';
 
 export const AppCollectionName = 'apps';
 
@@ -21,6 +22,11 @@ export const chatConfigType = {
 };
 
 const AppSchema = new Schema({
+  parentId: {
+    type: Schema.Types.ObjectId,
+    ref: AppCollectionName,
+    default: null
+  },
   teamId: {
     type: Schema.Types.ObjectId,
     ref: TeamCollectionName,
@@ -37,8 +43,8 @@ const AppSchema = new Schema({
   },
   type: {
     type: String,
-    default: 'advanced',
-    enum: Object.keys(AppTypeMap)
+    default: AppTypeEnum.advanced,
+    enum: Object.values(AppTypeEnum)
   },
   version: {
     type: String,
@@ -98,12 +104,18 @@ const AppSchema = new Schema({
 
   inited: {
     type: Boolean
+  },
+
+  // the default permission of a app
+  defaultPermission: {
+    type: Number,
+    default: AppDefaultPermissionVal
   }
 });
 
 try {
   AppSchema.index({ updateTime: -1 });
-  AppSchema.index({ teamId: 1 });
+  AppSchema.index({ teamId: 1, type: 1 });
   AppSchema.index({ scheduledTriggerConfig: 1, intervalNextTime: -1 });
 } catch (error) {
   console.log(error);

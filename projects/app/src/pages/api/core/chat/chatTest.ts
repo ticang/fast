@@ -10,14 +10,14 @@ import type {
   ChatItemValueItemType,
   UserChatItemValueItemType
 } from '@fastgpt/global/core/chat/type';
-import { authApp } from '@fastgpt/service/support/permission/auth/app';
+import { authApp } from '@fastgpt/service/support/permission/app/auth';
 import { dispatchWorkFlow } from '@fastgpt/service/core/workflow/dispatch';
 import { authCert } from '@fastgpt/service/support/permission/auth/common';
 import { getUserChatInfoAndAuthTeamPoints } from '@/service/support/permission/auth/team';
-import { chatValue2RuntimePrompt } from '@fastgpt/global/core/chat/adapt';
 import { RuntimeEdgeItemType } from '@fastgpt/global/core/workflow/type/edge';
 import { RuntimeNodeItemType } from '@fastgpt/global/core/workflow/runtime/type';
 import { removeEmptyUserInput } from '@fastgpt/global/core/chat/utils';
+import { ReadPermissionVal } from '@fastgpt/global/support/permission/constant';
 
 export type Props = {
   history: ChatItemType[];
@@ -60,8 +60,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     /* user auth */
-    const [_, { teamId, tmbId }] = await Promise.all([
-      authApp({ req, authToken: true, appId, per: 'r' }),
+    const [{ app }, { teamId, tmbId }] = await Promise.all([
+      authApp({ req, authToken: true, appId, per: ReadPermissionVal }),
       authCert({
         req,
         authToken: true
@@ -78,7 +78,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       teamId,
       tmbId,
       user,
-      appId,
+      app,
       runtimeNodes: nodes,
       runtimeEdges: edges,
       variables,

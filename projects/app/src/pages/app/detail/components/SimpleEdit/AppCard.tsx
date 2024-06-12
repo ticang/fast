@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Box, Flex, Button, IconButton } from '@chakra-ui/react';
+import { Box, Flex, Button, IconButton, useDisclosure } from '@chakra-ui/react';
 import { DragHandleIcon } from '@chakra-ui/icons';
 import { useRequest } from '@fastgpt/web/hooks/useRequest';
 import { useConfirm } from '@fastgpt/web/hooks/useConfirm';
 import { useRouter } from 'next/router';
 import { useToast } from '@fastgpt/web/hooks/useToast';
 import { AppSchema } from '@fastgpt/global/core/app/type.d';
-import { delModelById } from '@/web/core/app/api';
+import { delAppById } from '@/web/core/app/api';
 import { useTranslation } from 'next-i18next';
 import PermissionIconText from '@/components/support/permission/IconText';
 import dynamic from 'next/dynamic';
@@ -19,16 +19,22 @@ import { AppContext } from '@/web/core/app/context/appContext';
 import { useContextSelector } from 'use-context-selector';
 const InfoModal = dynamic(() => import('../InfoModal'));
 
-const AppCard = ({ appId }: { appId: string }) => {
+const AppCard = () => {
   const router = useRouter();
   const { t } = useTranslation();
   const { appT } = useI18n();
 
   const { toast } = useToast();
   const { appDetail } = useContextSelector(AppContext, (v) => v);
+  const appId = appDetail._id;
   const { feConfigs } = useSystemStore();
-  const [settingAppInfo, setSettingAppInfo] = useState<AppSchema>();
   const [TeamTagsSet, setTeamTagsSet] = useState<AppSchema>();
+
+  const {
+    isOpen: isOpenInfoEdit,
+    onOpen: onOpenInfoEdit,
+    onClose: onCloseInfoEdit
+  } = useDisclosure();
 
   const { openConfirm: openConfirmDel, ConfirmModal: ConfirmDelModal } = useConfirm({
     content: appT('Confirm Del App Tip'),
@@ -39,7 +45,7 @@ const AppCard = ({ appId }: { appId: string }) => {
   const { mutate: handleDelModel, isLoading } = useRequest({
     mutationFn: async () => {
       if (!appDetail) return null;
-      await delModelById(appDetail._id);
+      await delAppById(appDetail._id);
       return 'success';
     },
     onSuccess(res) {
@@ -57,10 +63,10 @@ const AppCard = ({ appId }: { appId: string }) => {
     <>
       <Box px={4}>
         <Flex alignItems={'center'} justifyContent={'space-between'}>
-          <Box fontSize={['md', 'xl']} fontWeight={'bold'}>
-            <PermissionIconText permission={appDetail.permission} />
+          <Box fontWeight={'bold'}>
+            <PermissionIconText defaultPermission={appDetail.defaultPermission} fontSize={'md'} />
           </Box>
-          <Box color={'myGray.500'} fontSize={'sm'}>
+          <Box color={'myGray.500'} fontSize={'xs'}>
             AppId:{' '}
             <Box as={'span'} userSelect={'all'}>
               {appId}
@@ -78,12 +84,12 @@ const AppCard = ({ appId }: { appId: string }) => {
           bg={'primary.50'}
           position={'relative'}
         >
-          <Flex alignItems={'center'} py={2}>
+          <Flex alignItems={'center'}>
             <Avatar src={appDetail.avatar} borderRadius={'md'} w={'28px'} />
-            <Box ml={3} fontWeight={'bold'} fontSize={'lg'}>
+            <Box ml={3} fontWeight={'bold'} fontSize={'md'}>
               {appDetail.name}
             </Box>
-            {appDetail.isOwner && (
+            {appDetail.permission.isOwner && (
               <IconButton
                 className="delete"
                 position={'absolute'}
@@ -101,10 +107,12 @@ const AppCard = ({ appId }: { appId: string }) => {
           </Flex>
           <Box
             flex={1}
-            my={2}
+            mt={3}
+            mb={4}
             className={'textEllipsis3'}
             wordBreak={'break-all'}
             color={'myGray.600'}
+            fontSize={'xs'}
           >
             {appDetail.intro || t('core.app.tip.Add a intro to app')}
           </Box>
@@ -133,7 +141,7 @@ const AppCard = ({ appId }: { appId: string }) => {
             >
               {t('core.app.navbar.Publish')}
             </Button>
-            {appDetail.canWrite && feConfigs?.show_team_chat && (
+            {appDetail.permission.hasWritePer && feConfigs?.show_team_chat && (
               <Button
                 mr={3}
                 size={['sm', 'md']}
@@ -144,12 +152,12 @@ const AppCard = ({ appId }: { appId: string }) => {
                 {t('common.Team Tags Set')}
               </Button>
             )}
-            {appDetail.isOwner && (
+            {appDetail.permission.hasManagePer && (
               <Button
                 size={['sm', 'md']}
                 variant={'whitePrimary'}
                 leftIcon={<MyIcon name={'common/settingLight'} w={'16px'} />}
-                onClick={() => setSettingAppInfo(appDetail)}
+                onClick={onOpenInfoEdit}
               >
                 {t('common.Setting')}
               </Button>
@@ -158,9 +166,7 @@ const AppCard = ({ appId }: { appId: string }) => {
         </Box>
       </Box>
       <ConfirmDelModal />
-      {settingAppInfo && (
-        <InfoModal defaultApp={settingAppInfo} onClose={() => setSettingAppInfo(undefined)} />
-      )}
+      {isOpenInfoEdit && <InfoModal onClose={onCloseInfoEdit} />}
       {TeamTagsSet && <TagsEditModal onClose={() => setTeamTagsSet(undefined)} />}
     </>
   );

@@ -1,13 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { pushChatUsage } from '@/service/support/wallet/usage/push';
 import { UsageSourceEnum } from '@fastgpt/global/support/wallet/usage/constants';
-import { authApp } from '@fastgpt/service/support/permission/auth/app';
+import { authApp } from '@fastgpt/service/support/permission/app/auth';
 import { dispatchWorkFlow } from '@fastgpt/service/core/workflow/dispatch';
 import { authCert } from '@fastgpt/service/support/permission/auth/common';
 import { getUserChatInfoAndAuthTeamPoints } from '@/service/support/permission/auth/team';
 import { PostWorkflowDebugProps, PostWorkflowDebugResponse } from '@/global/core/workflow/api';
 import { authPluginCrud } from '@fastgpt/service/support/permission/auth/plugin';
 import { NextAPI } from '@/service/middleware/entry';
+import { ReadPermissionVal } from '@fastgpt/global/support/permission/constant';
+import { defaultApp } from '@/web/core/app/constants';
 
 async function handler(
   req: NextApiRequest,
@@ -37,12 +39,18 @@ async function handler(
       req,
       authToken: true
     }),
-    appId && authApp({ req, authToken: true, appId, per: 'r' }),
+    appId && authApp({ req, authToken: true, appId, per: ReadPermissionVal }),
     pluginId && authPluginCrud({ req, authToken: true, pluginId, per: 'r' })
   ]);
 
   // auth balance
   const { user } = await getUserChatInfoAndAuthTeamPoints(tmbId);
+
+  const app = {
+    ...defaultApp,
+    teamId,
+    tmbId
+  };
 
   /* start process */
   const { flowUsages, flowResponses, debugResponse } = await dispatchWorkFlow({
@@ -51,7 +59,7 @@ async function handler(
     teamId,
     tmbId,
     user,
-    appId,
+    app,
     runtimeNodes: nodes,
     runtimeEdges: edges,
     variables,

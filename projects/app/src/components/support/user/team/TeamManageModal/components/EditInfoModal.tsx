@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'next-i18next';
 import { useSelectFile } from '@/web/common/file/hooks/useSelectFile';
@@ -8,13 +8,13 @@ import { getErrText } from '@fastgpt/global/common/error/utils';
 import { useRequest } from '@fastgpt/web/hooks/useRequest';
 import MyModal from '@fastgpt/web/components/common/MyModal';
 import { Box, Button, Flex, Input, ModalBody, ModalFooter } from '@chakra-ui/react';
-import MyTooltip from '@/components/MyTooltip';
+import MyTooltip from '@fastgpt/web/components/common/MyTooltip';
 import Avatar from '@/components/Avatar';
 import { postCreateTeam, putUpdateTeam } from '@/web/support/user/team/api';
 import { CreateTeamProps } from '@fastgpt/global/support/user/team/controller.d';
 import { MongoImageTypeEnum } from '@fastgpt/global/common/file/image/constants';
 
-export type FormDataType = CreateTeamProps & {
+export type EditTeamFormDataType = CreateTeamProps & {
   id?: string;
 };
 
@@ -28,17 +28,17 @@ function EditModal({
   onClose,
   onSuccess
 }: {
-  defaultData?: FormDataType;
+  defaultData?: EditTeamFormDataType;
   onClose: () => void;
   onSuccess: () => void;
 }) {
   const { t } = useTranslation();
-  const [refresh, setRefresh] = useState(false);
   const { toast } = useToast();
 
-  const { register, setValue, getValues, handleSubmit } = useForm<CreateTeamProps>({
+  const { register, setValue, handleSubmit, watch } = useForm<CreateTeamProps>({
     defaultValues: defaultData
   });
+  const avatar = watch('avatar');
 
   const { File, onOpen: onOpenSelectFile } = useSelectFile({
     fileType: '.jpg,.png,.svg',
@@ -57,7 +57,6 @@ function EditModal({
           maxH: 300
         });
         setValue('avatar', src);
-        setRefresh((state) => !state);
       } catch (err: any) {
         toast({
           title: getErrText(err, t('common.Select File Failed')),
@@ -80,7 +79,7 @@ function EditModal({
     errorToast: t('common.Create Failed')
   });
   const { mutate: onclickUpdate, isLoading: updating } = useRequest({
-    mutationFn: async (data: FormDataType) => {
+    mutationFn: async (data: EditTeamFormDataType) => {
       if (!data.id) return Promise.resolve('');
       return putUpdateTeam({
         name: data.name,
@@ -110,7 +109,7 @@ function EditModal({
           <MyTooltip label={t('common.Set Avatar')}>
             <Avatar
               flexShrink={0}
-              src={getValues('avatar')}
+              src={avatar}
               w={['28px', '32px']}
               h={['28px', '32px']}
               cursor={'pointer'}

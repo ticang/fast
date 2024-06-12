@@ -14,44 +14,31 @@ import {
 } from '@chakra-ui/react';
 import Avatar from '@/components/Avatar';
 import MyModal from '@fastgpt/web/components/common/MyModal';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { useContextSelector } from 'use-context-selector';
-import { TeamContext } from '.';
-import {
-  hasManage,
-  constructPermission,
-  PermissionList
-} from '@fastgpt/service/support/permission/resourcePermission/permisson';
 import { useRequest } from '@fastgpt/web/hooks/useRequest';
 import { updateMemberPermission } from '@/web/support/user/team/api';
 import { useUserStore } from '@/web/support/user/useUserStore';
 import MyIcon from '@fastgpt/web/components/common/Icon';
+import { ManagePermissionVal } from '@fastgpt/global/support/permission/constant';
+import { TeamModalContext } from '../../context';
+import { useI18n } from '@/web/context/I18n';
 
 function AddManagerModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const { t } = useTranslation();
+  const { userT } = useI18n();
   const { userInfo } = useUserStore();
-  const refetchMembers = useContextSelector(TeamContext, (v) => v.refetchMembers);
-  const members = useContextSelector(TeamContext, (v) =>
-    v.members.filter((member) => {
-      return member.tmbId != userInfo!.team.tmbId && !hasManage(member.permission);
-    })
-  );
+  const { members, refetchMembers } = useContextSelector(TeamModalContext, (v) => v);
+
   const [selected, setSelected] = useState<typeof members>([]);
-  const [search, setSearch] = useState<string>('');
-  const [searched, setSearched] = useState<typeof members>(members);
+  const [searchKey, setSearchKey] = useState('');
 
   const { mutate: submit, isLoading } = useRequest({
     mutationFn: async () => {
-      console.log(selected);
       return updateMemberPermission({
-        teamId: userInfo!.team.teamId,
-        permission: constructPermission([
-          PermissionList['Read'],
-          PermissionList['Write'],
-          PermissionList['Manage']
-        ]).value,
-        memberIds: selected.map((item) => {
+        permission: ManagePermissionVal,
+        tmbIds: selected.map((item) => {
           return item.tmbId;
         })
       });
@@ -63,18 +50,23 @@ function AddManagerModal({ onClose, onSuccess }: { onClose: () => void; onSucces
     successToast: '成功',
     errorToast: '失败'
   });
+
+  const filterMembers = useMemo(() => {
+    return members.filter((member) => {
+      if (member.permission.isOwner) return false;
+      if (!searchKey) return true;
+      return !!member.memberName.includes(searchKey);
+    });
+  }, [members, searchKey]);
+
   return (
     <MyModal
       isOpen
-      iconSrc={'support/permission/collaborator'}
+      iconSrc={'modal/AddClb'}
       maxW={['90vw']}
       minW={['900px']}
       overflow={'unset'}
-      title={
-        <Box>
-          <Box>添加管理员</Box>
-        </Box>
-      }
+      title={userT('team.Add manager')}
     >
       <ModalCloseButton onClick={onClose} />
       <ModalBody py={6} px={10}>
@@ -86,30 +78,26 @@ function AddManagerModal({ onClose, onSuccess }: { onClose: () => void; onSucces
           borderColor="myGray.200"
         >
           <Flex flexDirection="column" p="4">
-            <InputGroup alignItems="center" h="32px" my="2" py="1">
+            <InputGroup alignItems="center" size={'sm'}>
               <InputLeftElement>
                 <MyIcon name="common/searchLight" w="16px" color={'myGray.500'} />
               </InputLeftElement>
               <Input
                 placeholder="搜索用户名"
-                fontSize="lg"
+                fontSize="sm"
                 bg={'myGray.50'}
                 onChange={(e) => {
-                  setSearch(e.target.value);
-                  setSearched(
-                    members.filter((member) => member.memberName.includes(e.target.value))
-                  );
+                  setSearchKey(e.target.value);
                 }}
               />
             </InputGroup>
             <Flex flexDirection="column" mt={3}>
-              {searched.map((member) => {
+              {filterMembers.map((member) => {
                 return (
                   <Flex
                     py="2"
                     px={3}
                     borderRadius={'md'}
-                    fontSize="lg"
                     alignItems="center"
                     key={member.tmbId}
                     cursor={'pointer'}
@@ -123,8 +111,8 @@ function AddManagerModal({ onClose, onSuccess }: { onClose: () => void; onSucces
                       }
                     }}
                   >
-                    <Checkbox isChecked={selected.includes(member)} size="lg" />
-                    <Avatar src={member.avatar} w="24px" />
+                    <Checkbox isChecked={selected.includes(member)} />
+                    <Avatar ml={2} src={member.avatar} w="1.5rem" />
                     {member.memberName}
                   </Flex>
                 );
@@ -146,11 +134,13 @@ function AddManagerModal({ onClose, onSuccess }: { onClose: () => void; onSucces
                     _hover={{ bg: 'myGray.50' }}
                     _notLast={{ mb: 2 }}
                   >
-                    <Avatar src={member.avatar} w="24px" />
-                    <Box w="full" fontSize="lg">
-                      {member.memberName}
-                    </Box>
-                    <CloseButton
+                    <Avatar src={member.avatar} w="1.5rem" />
+                    <Box w="full">{member.memberName}</Box>
+                    <MyIcon
+                      name={'common/closeLight'}
+                      w={'1rem'}
+                      cursor={'pointer'}
+                      _hover={{ color: 'red.600' }}
                       onClick={() =>
                         setSelected([...selected.filter((item) => item.tmbId != member.tmbId)])
                       }
@@ -164,7 +154,7 @@ function AddManagerModal({ onClose, onSuccess }: { onClose: () => void; onSucces
       </ModalBody>
       <ModalFooter alignItems="flex-end">
         <Button h={'30px'} isLoading={isLoading} onClick={submit}>
-          确定
+          {t('common.Confirm')}
         </Button>
       </ModalFooter>
     </MyModal>

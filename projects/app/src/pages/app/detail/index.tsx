@@ -59,24 +59,25 @@ const AppDetail = ({ appId, currentTab }: { appId: string; currentTab: TabEnum }
         id: TabEnum.simpleEdit,
         icon: 'common/overviewLight'
       },
-      ...(feConfigs?.hide_app_flow
-        ? []
-        : [
-            {
-              label: t('core.app.navbar.Flow mode'),
-              id: TabEnum.adEdit,
-              icon: 'core/modules/flowLight'
-            }
-          ]),
+
       {
-        label: t('core.app.navbar.Publish app'),
-        id: TabEnum.publish,
-        icon: 'support/outlink/shareLight'
+        label: t('core.app.navbar.Flow mode'),
+        id: TabEnum.adEdit,
+        icon: 'core/modules/flowLight'
       },
-      { label: appT('Chat logs'), id: TabEnum.logs, icon: 'core/app/logsLight' },
+      ...(appDetail.permission.hasManagePer
+        ? [
+            {
+              label: t('core.app.navbar.Publish app'),
+              id: TabEnum.publish,
+              icon: 'support/outlink/shareLight'
+            },
+            { label: appT('Chat logs'), id: TabEnum.logs, icon: 'core/app/logsLight' }
+          ]
+        : []),
       { label: t('core.Start chat'), id: TabEnum.startChat, icon: 'core/chat/chatLight' }
     ],
-    [appT, feConfigs?.hide_app_flow, t]
+    [appDetail.permission.hasManagePer, appT, t]
   );
 
   const onCloseFlowEdit = useCallback(() => setCurrentTab(TabEnum.simpleEdit), [setCurrentTab]);
@@ -99,7 +100,7 @@ const AppDetail = ({ appId, currentTab }: { appId: string; currentTab: TabEnum }
             >
               <Flex mb={4} alignItems={'center'}>
                 <Avatar src={appDetail.avatar} w={'34px'} borderRadius={'md'} />
-                <Box ml={2} fontWeight={'bold'}>
+                <Box ml={2} fontSize={'sm'} fontWeight={'bold'}>
                   {appDetail.name}
                 </Box>
               </Flex>
@@ -141,7 +142,7 @@ const AppDetail = ({ appId, currentTab }: { appId: string; currentTab: TabEnum }
             </Box>
             {/* phone tab */}
             <Box display={['block', 'none']} textAlign={'center'} py={3}>
-              <Box className="textlg" fontSize={'xl'} fontWeight={'bold'}>
+              <Box className="textlg" fontSize={'lg'} fontWeight={'bold'}>
                 {appDetail.name}
               </Box>
               <Tabs

@@ -146,16 +146,16 @@ export const delCollectionRelatedSource = async ({
     .map((item) => item?.metadata?.relatedImgId || '')
     .filter(Boolean);
 
+  // delete files
+  await delFileByFileIdList({
+    bucketName: BucketNameEnum.dataset,
+    fileIdList
+  });
   // delete images
   await delImgByRelatedId({
     teamId,
     relateIds: relatedImageIds,
     session
-  });
-  // delete files
-  await delFileByFileIdList({
-    bucketName: BucketNameEnum.dataset,
-    fileIdList
   });
 };
 /**
@@ -186,14 +186,16 @@ export async function delCollectionAndRelatedSources({
   );
   const collectionIds = collections.map((item) => String(item._id));
 
-  await delCollectionRelatedSource({ collections, session });
-
   // delete training data
   await MongoDatasetTraining.deleteMany({
     teamId,
     datasetIds: { $in: datasetIds },
     collectionId: { $in: collectionIds }
   });
+
+  /* file and imgs */
+  await delCollectionRelatedSource({ collections, session });
+
   // delete dataset.datas
   await MongoDatasetData.deleteMany(
     { teamId, datasetIds: { $in: datasetIds }, collectionId: { $in: collectionIds } },
@@ -203,6 +205,7 @@ export async function delCollectionAndRelatedSources({
   // delete collections
   await MongoDatasetCollection.deleteMany(
     {
+      teamId,
       _id: { $in: collectionIds }
     },
     { session }

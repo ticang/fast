@@ -1,4 +1,4 @@
-import { TeamItemType, TeamMemberWithTeamSchema } from '@fastgpt/global/support/user/team/type';
+import { TeamTmbItemType, TeamMemberWithTeamSchema } from '@fastgpt/global/support/user/team/type';
 import { ClientSession, Types } from '../../../common/mongo';
 import {
   TeamMemberRoleEnum,
@@ -8,16 +8,25 @@ import {
 import { MongoTeamMember } from './teamMemberSchema';
 import { MongoTeam } from './teamSchema';
 import { UpdateTeamProps } from '@fastgpt/global/support/user/team/controller';
+import { getResourcePermission } from '../../permission/controller';
+import { PerResourceTypeEnum } from '@fastgpt/global/support/permission/constant';
+import { TeamPermission } from '@fastgpt/global/support/permission/user/controller';
 import { MongoUser } from '../schema';
 import { mongoSessionRun } from '../../../common/mongo/sessionRun';
 import { hashStr } from '@fastgpt/global/common/string/tools';
 import { PRICE_SCALE } from '@fastgpt/global/support/wallet/constants';
 
-async function getTeamMember(match: Record<string, any>): Promise<TeamItemType> {
+async function getTeamMember(match: Record<string, any>): Promise<TeamTmbItemType> {
   const tmb = (await MongoTeamMember.findOne(match).populate('teamId')) as TeamMemberWithTeamSchema;
   if (!tmb) {
     return Promise.reject('member not exist');
   }
+
+  const tmbPer = await getResourcePermission({
+    resourceType: PerResourceTypeEnum.team,
+    teamId: tmb.teamId._id,
+    tmbId: tmb._id
+  });
 
   return {
     userId: String(tmb.userId),
@@ -31,9 +40,11 @@ async function getTeamMember(match: Record<string, any>): Promise<TeamItemType> 
     role: tmb.role,
     status: tmb.status,
     defaultTeam: tmb.defaultTeam,
-    canWrite: tmb.role !== TeamMemberRoleEnum.visitor,
     lafAccount: tmb.teamId.lafAccount,
-    defaultPermission: tmb.teamId.defaultPermission
+    permission: new TeamPermission({
+      per: tmbPer?.permission ?? tmb.teamId.defaultPermission,
+      isOwner: tmb.role === TeamMemberRoleEnum.owner
+    })
   };
 }
 

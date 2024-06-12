@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   Menu,
   MenuList,
@@ -9,27 +9,35 @@ import {
   MenuItemProps
 } from '@chakra-ui/react';
 import MyIcon from '../Icon';
+import MyDivider from '../MyDivider';
+import type { IconNameType } from '../Icon/type';
 
-type MenuItemType = 'primary' | 'danger';
+export type MenuItemType = 'primary' | 'danger';
 
 export type Props = {
   width?: number | string;
   offset?: [number, number];
   Button: React.ReactNode;
   trigger?: 'hover' | 'click';
+  iconSize?: string;
   menuList: {
-    isActive?: boolean;
-    label: string | React.ReactNode;
-    icon?: string;
-    type?: MenuItemType;
-    onClick: () => any;
+    label?: string;
+    children: {
+      isActive?: boolean;
+      type?: MenuItemType;
+      icon?: IconNameType | string;
+      label: string | React.ReactNode;
+      description?: string;
+      onClick: () => any;
+    }[];
   }[];
 };
 
 const MyMenu = ({
   width = 'auto',
   trigger = 'hover',
-  offset = [0, 5],
+  offset,
+  iconSize = '1rem',
   Button,
   menuList
 }: Props) => {
@@ -41,17 +49,19 @@ const MyMenu = ({
       }
     },
     danger: {
+      color: 'red.600',
       _hover: {
-        color: 'red.600',
         background: 'red.1'
       }
     }
   };
   const menuItemStyles: MenuItemProps = {
     borderRadius: 'sm',
-    py: 3,
+    py: 2,
+    px: 3,
     display: 'flex',
-    alignItems: 'center'
+    alignItems: 'center',
+    fontSize: 'sm'
   };
   const ref = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<any>();
@@ -64,8 +74,14 @@ const MyMenu = ({
     }
   });
 
+  const computeOffset = useMemo<[number, number]>(() => {
+    if (offset) return offset;
+    if (typeof width === 'number') return [-width / 2, 5];
+    return [0, 5];
+  }, [offset]);
+
   return (
-    <Menu offset={offset} isOpen={isOpen} autoSelect={false} direction={'ltr'} isLazy>
+    <Menu offset={computeOffset} isOpen={isOpen} autoSelect={false} direction={'ltr'} isLazy>
       <Box
         ref={ref}
         onMouseEnter={() => {
@@ -84,7 +100,8 @@ const MyMenu = ({
       >
         <Box
           position={'relative'}
-          onClickCapture={() => {
+          onClickCapture={(e) => {
+            e.stopPropagation();
             if (trigger === 'click') {
               setIsOpen(!isOpen);
             }
@@ -109,23 +126,41 @@ const MyMenu = ({
             '0px 2px 4px rgba(161, 167, 179, 0.25), 0px 0px 1px rgba(121, 141, 159, 0.25);'
           }
         >
-          {menuList.map((item, i) => (
-            <MenuItem
-              key={i}
-              {...menuItemStyles}
-              {...typeMapStyle[item.type || 'primary']}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsOpen(false);
-                item.onClick && item.onClick();
-              }}
-              color={item.isActive ? 'primary.700' : 'myGray.600'}
-              whiteSpace={'pre-wrap'}
-            >
-              {!!item.icon && <MyIcon name={item.icon as any} w={'16px'} mr={2} />}
-              {item.label}
-            </MenuItem>
-          ))}
+          {menuList.map((item, i) => {
+            return (
+              <Box key={i}>
+                {item.label && <Box fontSize={'sm'}>{item.label}</Box>}
+                {i !== 0 && <MyDivider h={'1.5px'} my={1} />}
+                {item.children.map((child, index) => (
+                  <MenuItem
+                    key={index}
+                    {...menuItemStyles}
+                    onClickCapture={(e) => {
+                      e.stopPropagation();
+                      setIsOpen(false);
+                      child.onClick && child.onClick();
+                    }}
+                    color={child.isActive ? 'primary.700' : 'myGray.600'}
+                    whiteSpace={'pre-wrap'}
+                    _notLast={{ mb: 0.5 }}
+                    {...typeMapStyle[child.type || 'primary']}
+                  >
+                    {!!child.icon && <MyIcon name={child.icon as any} w={iconSize} mr={3} />}
+                    <Box>
+                      <Box color={child.description ? 'myGray.900' : 'inherit'} fontSize={'sm'}>
+                        {child.label}
+                      </Box>
+                      {child.description && (
+                        <Box color={'myGray.500'} fontSize={'mini'}>
+                          {child.description}
+                        </Box>
+                      )}
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Box>
+            );
+          })}
         </MenuList>
       </Box>
     </Menu>

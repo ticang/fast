@@ -49,6 +49,7 @@
     "Delete Success": "删除成功",
     "Delete Tip": "删除提示",
     "Delete Warning": "删除警告",
+    "Delete folder": "删除文件夹",
     "Detail": "详情",
     "Documents": "文档",
     "Done": "完成",
@@ -64,6 +65,8 @@
     "Import failed": "导入失败",
     "Import success": "导入成功",
     "Input": "输入",
+    "Input folder description": "文件夹描述",
+    "Input name": "取个名字",
     "Intro": "介绍",
     "Invalid Json": "无效的JSON格式，请注意检查。",
     "Last Step": "上一步",
@@ -71,6 +74,7 @@
     "Load Failed": "加载失败",
     "Loading": "加载中...",
     "More settings": "更多设置",
+    "Move": "移动",
     "MultipleRowSelect": {
       "No data": "没有可选值"
     },
@@ -84,6 +88,7 @@
     "OK": "好的",
     "Open": "打开",
     "Opened": "已开启",
+    "Operation": "操作",
     "Other": "其他",
     "Output": "输出",
     "Params": "参数",
@@ -162,7 +167,9 @@
     "folder": {
       "Drag Tip": "点我可拖动",
       "Move Success": "移动成功",
+      "Move to": "移动到",
       "No Folder": "没有子目录了，就放这里吧",
+      "Open folder": "打开文件夹",
       "Root Path": "根目录",
       "empty": "这个目录已经没东西可选了~"
     },
@@ -585,7 +592,8 @@
             "success": "开始同步"
           }
         },
-        "training": {}
+        "training": {
+        }
       },
       "data": {
         "Auxiliary Data": "辅助数据",
@@ -618,6 +626,7 @@
         "unCreateCollection": "无权操作该数据",
         "unLinkCollection": "不是网络链接集合"
       },
+      "externalFile": "外部文件库",
       "file": "文件",
       "folder": "目录",
       "import": {
@@ -1218,6 +1227,13 @@
     "Tools": "工具"
   },
   "permission": {
+    "Collaborator": "协作者",
+    "Default permission": "默认权限",
+    "Manage": "管理",
+    "Not collaborator": "暂无协作者",
+    "Owner": "创建者",
+    "Permission": "权限",
+    "Permission config": "权限配置",
     "Private": "私有",
     "Private Tip": "仅自己可用",
     "Public": "团队",
@@ -1295,6 +1311,9 @@
         "Response Quote": "返回引用",
         "Response Quote tips": "在分享链接中返回引用内容，但不会允许用户下载原文档"
       }
+    },
+    "permission": {
+      "Permission": "权限"
     },
     "standard": {
       "AI Bonus Points": "AI 积分",
@@ -1561,9 +1580,6 @@
       "Invite Member Success Tip": "邀请成员完成\n成功: {{success}}人\n用户名无效: {{inValid}}\n已在团队中:{{inTeam}}",
       "Invite Member Tips": "对方可查阅或使用团队内的其他资源",
       "Invite Role Admin Alias": "邀请管理员加入",
-      "Invite Role Admin Tip": "管理员\n可创建、编辑和使用团队资源",
-      "Invite Role Visitor Alias": "邀请访客加入",
-      "Invite Role Visitor Tip": "访客\n仅可使用资源，无创建编辑权限",
       "Leave Team": "离开团队",
       "Leave Team Failed": "离开团队异常",
       "Manage": "团队管理",
@@ -1574,7 +1590,7 @@
       "Processing invitations": "处理邀请",
       "Processing invitations Tips": "你有{{amount}}个需要处理的团队邀请",
       "Reinvite": "重新邀请",
-      "Remove Member Confirm Tip": "确认将 {{username}} 移出团队？其所有资源将转让到团队创建者的账户内。",
+      "Remove Member Confirm Tip": "确认将 {{username}} 移出团队？",
       "Remove Member Failed": "移除团队成员异常",
       "Remove Member Success": "移除团队成员成功",
       "Remove Member Tip": "移出团队",
