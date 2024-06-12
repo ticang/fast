@@ -61,8 +61,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       qaPrompt
     } = data;
     const { fileMetadata, collectionMetadata, ...collectionData } = data;
-    const collectionName = file.originalname;
-
+    let collectionName = file.originalname;
+    if (realName) {
+      collectionName = realName;
+    }
     const relatedImgId = getNanoid();
 
     // 1. read file

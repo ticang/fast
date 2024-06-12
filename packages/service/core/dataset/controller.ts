@@ -153,13 +153,13 @@ export async function findDatasetOrCreate({
     type
   });
 
-  if (type === DatasetTypeEnum.dataset) {
-    await createDefaultCollection({
-      datasetId: _id,
-      teamId,
-      tmbId
-    });
-  }
+  // if (type === DatasetTypeEnum.dataset) {
+  //   await createDefaultCollection({
+  //     datasetId: _id,
+  //     teamId,
+  //     tmbId
+  //   });
+  // }
 
   return _id;
 }

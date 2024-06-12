@@ -110,7 +110,7 @@ export async function findAppOrCreate({
       });
     }
   });
-  console.log('modules->', modules);
+  // console.log('modules->', modules);
   // 创建模型
   const appId = await mongoSessionRun(async (session) => {
     const [{ _id: appId }] = await MongoApp.create(

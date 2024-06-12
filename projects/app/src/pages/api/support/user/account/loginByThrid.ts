@@ -6,7 +6,7 @@ import { connectToDatabase } from '@/service/mongo';
 import { getUserDetail } from '@fastgpt/service/support/user/controller';
 import { hashStr } from '@fastgpt/global/common/string/tools';
 import { mongoSessionRun } from '@fastgpt/service/common/mongo/sessionRun';
-import { createDefaultTeam } from '@fastgpt/service/support/user/team/controller';
+import { createUserTeam } from '@fastgpt/service/support/user/team/controller';
 import { PRICE_SCALE } from '@fastgpt/global/support/wallet/constants';
 import { withNextCors } from '@fastgpt/service/common/middle/cors';
 import { findDatasetOrCreate } from '@fastgpt/service/core/dataset/controller';
@@ -19,8 +19,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await Promise.all([withNextCors(req, res), connectToDatabase()]);
     const { username } = req.query as { username: string };
     let { app } = req.query as { app: string };
+    let { data } = req.query as { data: string };
     if (app === null || app === undefined) {
-      app = 'polaris';
+      app = username;
+    }
+    if (data === null || data === undefined) {
+      data = username;
     }
     if (!username) {
       throw new Error('缺少参数');
@@ -49,9 +53,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         );
         rootId = _id;
         // init root team
-        await createDefaultTeam({
+        await createUserTeam({
           userId: _id,
-          teamName: username,
+          teamName: 'root',
           balance: 9999 * PRICE_SCALE,
           session
         });
@@ -88,7 +92,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     //create dataset
     const datasetId = await findDatasetOrCreate({
       avatar: '/icon/logo.svg',
-      name: app,
+      name: data,
       intro: '',
       type: 'dataset',
       teamId: teamId,

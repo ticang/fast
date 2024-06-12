@@ -8,6 +8,10 @@ import {
 import { MongoTeamMember } from './teamMemberSchema';
 import { MongoTeam } from './teamSchema';
 import { UpdateTeamProps } from '@fastgpt/global/support/user/team/controller';
+import { MongoUser } from '../schema';
+import { mongoSessionRun } from '../../../common/mongo/sessionRun';
+import { hashStr } from '@fastgpt/global/common/string/tools';
+import { PRICE_SCALE } from '@fastgpt/global/support/wallet/constants';
 
 async function getTeamMember(match: Record<string, any>): Promise<TeamItemType> {
   const tmb = (await MongoTeamMember.findOne(match).populate('teamId')) as TeamMemberWithTeamSchema;
@@ -110,6 +114,102 @@ export async function createDefaultTeam({
   }
 }
 
+export async function createUserTeam({
+  userId,
+  teamName,
+  avatar = '/icon/logo.svg',
+  balance,
+  session
+}: {
+  userId: string;
+  teamName?: string;
+  avatar?: string;
+  balance?: number;
+  session: ClientSession;
+}) {
+  // auth default team
+  const tmb = await MongoTeam.findOne({
+    name: teamName
+  });
+
+  if (!tmb) {
+    // create
+    await initRootUser();
+    console.log('create default team', userId);
+  } else {
+    console.log('default team exist', userId);
+    const tm = await MongoTeamMember.findOne({
+      userId: new Types.ObjectId(userId),
+      defaultTeam: true
+    });
+    if (!tm) {
+      await MongoTeamMember.create(
+        [
+          {
+            teamId: tmb._id,
+            userId,
+            name: 'admin',
+            role: TeamMemberRoleEnum.admin,
+            status: TeamMemberStatusEnum.active,
+            createTime: new Date(),
+            defaultTeam: true
+          }
+        ],
+        { session }
+      );
+    }
+  }
+}
+
+async function initRootUser(retry = 3): Promise<any> {
+  try {
+    const rootUser = await MongoUser.findOne({
+      username: 'root'
+    });
+    const psw = process.env.DEFAULT_ROOT_PSW || '123456';
+
+    let rootId = rootUser?._id || '';
+
+    await mongoSessionRun(async (session) => {
+      // init root user
+      if (rootUser) {
+        await rootUser.updateOne({
+          password: hashStr(psw)
+        });
+      } else {
+        const [{ _id }] = await MongoUser.create(
+          [
+            {
+              username: 'root',
+              password: hashStr(psw)
+            }
+          ],
+          { session }
+        );
+        rootId = _id;
+      }
+      // init root team
+      await createDefaultTeam({
+        userId: rootId,
+        teamName: 'root',
+        balance: 9999 * PRICE_SCALE,
+        session
+      });
+    });
+
+    console.log(`root user init:`, {
+      username: 'root',
+      password: psw
+    });
+  } catch (error) {
+    if (retry > 0) {
+      console.log('retry init root user');
+      return initRootUser(retry - 1);
+    } else {
+      console.error('init root user error', error);
+    }
+  }
+}
 export async function updateTeam({
   teamId,
   name,
